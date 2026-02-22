@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from models import db, Products, Purchases
 app = Flask(__name__)
 
@@ -12,15 +12,31 @@ def home():
     return ("Flask version 1.0")
 
 
-@app.route("/products")
+@app.route("/products", methods=["GET", "POST"])
 def products():
-    product = Products.query.all()
-    product_list = []
-    for x in product:
-        data = {"id": x.id, "name": x.name,
-                "buying_price": x.buying_price, "selling_price": x.selling_price}
-        product_list.append(data)
-    return jsonify(product_list)
+    if request.method == "GET":
+        product = Products.query.all()
+        product_list = []
+        for x in product:
+            data = {"id": x.id, "name": x.name,
+                    "buying_price": x.buying_price, "selling_price": x.selling_price}
+            product_list.append(data)
+        return jsonify(product_list)
+    elif request.method == "POST":
+        data = dict(request.get_json())
+        if "name"not in data.keys() or "buying_price"not in data.keys() or "selling_price"not in data.keys():
+            error = {"error": "Ensure all fields are set"}
+            return jsonify(error), 400
+        else:
+            prod = Products(
+                name=data["name"], buying_price=data["buying_price"], selling_price=data["selling_price"])
+            db.session.add(prod)
+            db.session.commit()
+            data["id"] = prod.id
+            return jsonify(data), 201
+    else:
+        error = {"error": "Method not allowed"}
+        return jsonify(error), 405
 
 
 @app.route("/purchases")
