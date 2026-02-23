@@ -9,23 +9,35 @@
 
 <body>
   <main>
-    <h1>Products Page</h1>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Buying</th>
-          <th>Selling</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="prod in products">
-          <td>{{prod["name"]}}</td>
-          <td>{{prod["buying_price"]}}</td>
-          <td>{{prod["selling_price"]}}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div id="app">
+      <h1>Products Page</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Buying</th>
+            <th>Selling</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="prod in products">
+            <td>{{prod["name"]}}</td>
+            <td>{{prod["buying_price"]}}</td>
+            <td>{{prod["selling_price"]}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <h1>Post</h1>
+      <form @submit.prevent="addProduct">
+        <label>Name</label>
+        <input v-model="name" placeholder="name" type="text"><br>
+        <label>Buying Price</label>
+        <input v-model="buying_price" placeholder="Price" type="number"><br>
+        <label>Selling Price</label>
+        <input v-model="selling_price" placeholder="Price" type="number"><br>
+        <button type="submit">Add</button>
+      </form>
+    </div>
   </main>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.16/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.0/axios.js"></script>
@@ -46,7 +58,27 @@
           } catch (error) {
             console.error("Error fetching products:", error)
           }
+        },
+        async addProduct() {
+          try {
+            const newProduct = {
+              name: this.name.trim(),
+              buying_price: this.buying_price,
+              selling_price: this.buying_price
+            };
+            await axios.post("http://127.0.0.1:5000/products", newProduct);
+            alert("Products added successfully!");
+            this.name = "",
+              this.buying_price = "",
+              this.selling_price = ""
+          } catch (error) {
+            console.error("Error adding product:", error);
+            alert("Failed to add product!")
+          }
         }
+      },
+      mounted() {
+        this.getProducts();
       }
     })
   </script>
