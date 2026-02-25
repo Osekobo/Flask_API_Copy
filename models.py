@@ -30,7 +30,7 @@ class Sale(db.Model):
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-class SaleDetails(db.Model):
+class SalesDetails(db.Model):
     __tablename__ = "sales_details"
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     sale_id = db.Column(db.Integer, db.ForeignKey("sales.id"), nullable=False)
@@ -49,3 +49,5 @@ class User(db.Model):
     created_on = db.Column(db.DateTime, default=datetime.utcnow)
     updated_on = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
