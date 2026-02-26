@@ -161,9 +161,8 @@ def purchases():
             "product_id": new_purchase.product_id,
             "quantity": new_purchase.quantity,
             "created_on": new_purchase.created_on.strftime("%Y-%m-%d %H:%M:%S") if new_purchase.created_on else None,
-            "updated_on": new_purchase.updated_on.strftime("%Y-%m-%d %H:%M:%S") if new_purchase.updated_on else None,
+            "updated_on": new_purchase.updated_on.strftime("%Y-%m-%d %H:%M:%S") if new_purchase.updated_on else None,   
         }
-
         return jsonify(response), 201
 
     return jsonify({"error": "Method not allowed!"}), 405
@@ -256,14 +255,56 @@ def sales():
     return jsonify({"error": "Method not allowed"}), 405
 
 
-# @app.route("/sales", methods=["GET", "POST"])
-# def sales():
-#     if request.method == "GET":
-#         results = ()
-#         pass
-#     elif request.method == "POST":
-#         pass
-#     return jsonify({"error": "Method not allowed!"}), 405
+@app.route("/sales", methods=["GET", "POST"])
+def sales():
+    if request.method == "GET":
+        results = (db.session.query(Sale, SalesDetails,
+                   Product).join(SalesDetails, SalesDetails.sale_id == Sale.id).join(Product, Product.id == SalesDetails.product_id).order_by(Sale.created_on.desc()).all())
+        sales_group = defaultdict(list)
+        for sale, detail, product in results:
+            sales_group[sale.id].append((Sale, detail, product))
+        result = [{"sale_id": sale.id, "created_on": sale.created_on.strftime(), "items": [
+            {"product_id": product.id, "product_name": product.name, "quantity": detail.quantity, }for _, detail, product in grouped], }for sale_id, grouped in sales_group.items()
+            for sale, _, _ in [grouped[0]]]
+        return jsonify(result), 200
+    elif request.method == "POST":
+        try:
+            data = request.get_json()
+            if not data:
+                return ({"error": "Invalid JSON body"}), 400
+            sales_data = data.get("sales", [])
+            if not sales_data or not isinstance(sales_data, list):
+                return jsonify({"error": "Request must include a 'sales'list"}), 400
+            for item in sales_data:
+                product_id = item.get("product_id")
+                quantity = item.get("quantity")
+                if product_id is None or quantity is None or quantity <= 0:
+                    return jsonify({"error": "Each sale must include valid product_id and quantity"}), 400
+            sale = Sale()
+            db.session.add(Sale)
+            db.session.flush()
+            created_details = []
+            for item in sales_data:
+                detail = SalesDetails(
+                    sale_id=sale.id,
+                    product_id=item["product_id"],
+                    quantity=item["quantity"],
+                )
+                db.session.add(detail)
+                created_details.append({
+                    "product_id": detail.product_id,
+                    "quantity": detail.quantity,
+                })
+                db.session.commit()
+                return jsonify({
+                    "message": "Sales added su",
+                    "sale_id": sale.id,
+                    "details": created_details
+                }), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
+    return jsonify({"error": "Method not allowed!"}), 405
 
 
 if __name__ == "__main__":
