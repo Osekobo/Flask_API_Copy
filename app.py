@@ -74,5 +74,14 @@ def purchases():
             purchases_list.append(data)
         return jsonify(purchases_list), 200
     elif request.method == "POST":
-        pass
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid JSON data!"}), 400
+        if "quantity" not in data or "product_id"not in data:
+            return jsonify({"error": "Ensure all fields are set!"}), 400
+        purch = Purchase()
+        db.session.add(purch)
+        db.session.commit()
+        response = []
+        return jsonify(response), 201
     return jsonify({"error": "Method not allowed!"}), 405
