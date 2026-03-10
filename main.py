@@ -60,7 +60,7 @@ def login():
     if not data or "email" not in data or "password" not in data:
         return jsonify({"error": "Ensure all fields are set!"}), 400
 
-    email = data.get("email").lower().strip()
+    email = data.get("email", "").lower().strip()
     password = data.get("password")
 
     usr = User.query.filter_by(email=email).first()
@@ -161,7 +161,7 @@ def purchases():
             "product_id": new_purchase.product_id,
             "quantity": new_purchase.quantity,
             "created_on": new_purchase.created_on.strftime("%Y-%m-%d %H:%M:%S") if new_purchase.created_on else None,
-            "updated_on": new_purchase.updated_on.strftime("%Y-%m-%d %H:%M:%S") if new_purchase.updated_on else None,   
+            "updated_on": new_purchase.updated_on.strftime("%Y-%m-%d %H:%M:%S") if new_purchase.updated_on else None,
         }
         return jsonify(response), 201
 
