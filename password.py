@@ -40,3 +40,26 @@ def forgot_password():
                     created_on=datetime.now(timezone.utc))
     db.session.add(otp_entry)
     db.session.commit()
+
+
+@auth.route("/verify_password", methods=["POST"])
+def verify_password():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Email and OTP required"}), 400
+
+    if not all(t in data for t in ("email", "otp")):
+        return jsonify({"error": "Email and OTP required"}), 400
+
+    email = data["email"].lower().strip()
+    otp = data["otp"].strip()
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    otp_entry = OTP.query.filter_by(user_id=user.id, otp=otp).first()
+    if not otp_entry:
+        return jsonify({"error": "Invalid OTP"}), 400
+
+    return jsonify({"message": "OTP verified successfully"}), 200
