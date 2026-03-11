@@ -86,14 +86,14 @@ def reset_password():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    otp_entry = User.query.filter_by(user_id=user.id, otp=otp).first()
+    otp_entry = OTP.query.filter_by(user_id=user.id, otp=otp).first()
 
     if not otp_entry:
         return jsonify({"error": "Invalid OTP"}), 400
 
     user.password = generate_password_hash(new_password)
 
-    db.session.add(otp_entry)
+    db.session.delete(otp_entry)
     db.session.commit()
-    
+
     return jsonify({"message": "Password reset successfully"}), 200
