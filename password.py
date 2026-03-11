@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import db, User, datetime, OTP
-from datetime import timezone
+from datetime import timezone, timedelta
 from utils import format_phone, generate_otp_code
 from werkzeug.security import generate_password_hash
 auth = Blueprint('auth', __name__)
@@ -42,8 +42,8 @@ def forgot_password():
     db.session.commit()
 
 
-@auth.route("/verify_password", methods=["POST"])
-def verify_password():
+@auth.route("/verify_otp", methods=["POST"])
+def verify_otp():
     data = request.get_json()
     if not data:
         return jsonify({"error": "Email and OTP required"}), 400
@@ -61,5 +61,22 @@ def verify_password():
     otp_entry = OTP.query.filter_by(user_id=user.id, otp=otp).first()
     if not otp_entry:
         return jsonify({"error": "Invalid OTP"}), 400
+    
+    if datetime.now(timezone.utc) - otp_entry.created_on > timedelta(minutes=5):
+        return jsonify({"error": "OTP expired"}), 400
+    
+    db.session.delete(otp_entry)
+    db.session.commit()
 
     return jsonify({"message": "OTP verified successfully"}), 200
+
+
+@auth.route("/reset_password", methods=["POST"])
+def reset_password():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Email, OTP and password required"}), 400
+
+    email = data["email"].lower().strip()
+    otp = data["otp"].strip()
+    new_password = data["password"]
