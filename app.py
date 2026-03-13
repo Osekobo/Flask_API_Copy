@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, Blueprint
 from models import db, User, OTP, datetime
 from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash
-from datetime import timezone
+from datetime import timezone, timedelta
 from utils import format_phone, generate_otp
 app = Flask(__name__)
 auth = Blueprint('auth', __name__)
@@ -107,7 +107,13 @@ def verify_otp():
 
     if not otp_entry:
         return jsonify({"error": "Invalid OTP"}), 400
-
+    
+    if datetime.now(timezone.utc) - otp_entry.created_on > timedelta(minutes=5):
+        return jsonify({"error": "OTP expired"}), 400
+    
+    db.session.delete(otp_entry)
+    db.session.commit()
+    
     return jsonify({
         "message": "OTP verified successfully"
     }), 200
@@ -143,6 +149,7 @@ def reset_password():
     return jsonify({
         "message": "Password reset successfully"
     }), 200
+
 
 
 if __name__ == "__main__":
