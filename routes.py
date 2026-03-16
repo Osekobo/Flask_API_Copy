@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import Payment, db
+from password import app
 from mpesa import stk_push
 
 payment_bp = Blueprint("payments", __name__)
@@ -60,5 +61,17 @@ def mpesa_callback():
         payment.status = "failed"
 
     db.session.commit()
+
+    return {"ResultCode": 0, "ResultDesc": "Accepted"}
+
+
+@app.route("/api/mpesa/callback", methods=["POST"])
+def mpesa_callback():
+
+    data = request.get_json()
+
+    print("\n===== MPESA CALLBACK =====")
+    print(data)
+    print("==========================\n")
 
     return {"ResultCode": 0, "ResultDesc": "Accepted"}
