@@ -140,6 +140,8 @@ def reset_password():
 
     if not otp_entry:
         return jsonify({"error": "Invalid OTP"}), 400
+       # if datetime.utcnow() - otp_entry.created_on > timedelta(minutes=10):
+    #     return jsonify({"error": "OTP expired"}), 400
 
     user.password = generate_password_hash(new_password)
 
