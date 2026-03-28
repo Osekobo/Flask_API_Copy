@@ -11,23 +11,25 @@ class Product(db.Model):
     selling_price = db.Column(db.Float, nullable=False)
 
 
-# class Purchase(db.Model):
-#     __tablename__ = "purchases"
-#     id = db.Column(db.Integer, primary_key=True, nullable=False)
-#     quantity = db.Column(db.Float, nullable=False)
-#     product_id = db.Column(db.Integer, db.ForeignKey(
-#         "products.id"), nullable=False)
-#     created_on = db.Column(db.DateTime, default=datetime.utcnow)
-#     updated_on = db.Column(
-#         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+class Purchase(db.Model):
+    __tablename__ = "purchases"
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey(
+        'products.id'), nullable=False)
+    created_on = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_on = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-# # class Sale(db.Model):
-# #     __tablename__ = "sales"
-# #     id = db.Column(db.Integer, primary_key=True, nullable=False)
-# #     created_on = db.Column(db.DateTime, default=datetime.utcnow)
-# #     updated_on = db.Column(
-# #         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+class Sale(db.Model):
+    __tablename__ = "sales"
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    created_on = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_on = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 # class Sale(db.Model):
 #     __tablename__ = "sales"
 #     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -36,13 +38,13 @@ class Product(db.Model):
 #     total = db.Column()
 
 
-# class SalesDetails(db.Model):
-#     __tablename__ = "sales_details"
-#     id = db.Column(db.Integer, primary_key=True, nullable=False)
-#     sale_id = db.Column(db.Integer, db.ForeignKey("sales.id"), nullable=False)
-#     product_id = db.Column(db.Integer, nullable=False)
-#     quantity = db.Column(db.Integer, nullable=False)
-#     created_on = db.Column(db.DateTime, default=datetime.now)
+class SalesDetails(db.Model):
+    __tablename__ = "sales_details"
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    sale_id = db.Column(db.Integer, db.ForeignKey("sales.id"), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    created_on = db.Column(db.DateTime, default=datetime.now)
 
 
 class User(db.Model):
